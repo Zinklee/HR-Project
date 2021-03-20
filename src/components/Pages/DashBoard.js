@@ -2,6 +2,7 @@ import React, { useState,useEffect } from 'react';
 import 'antd/dist/antd.css';
 import { Layout, Menu, Breadcrumb, Button , Collapse, Modal, InputNumber,Input, DatePicker,Select, Upload, message
 } from 'antd';
+import moment from 'moment';
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 import { Table,Tag,Space } from "antd";
 import axios from 'axios';
@@ -24,8 +25,8 @@ function DashBoard(){
     const isEditing = (record)=> record.key===editkey
 
     const[employeeId,setEmployeeId]=useState('')
-    const [employeeFristName, setemployeeFristName] = useState('hello')
-    const [employeeLastName, setemployeeLastName] = useState('last name')
+    const [employeeFristName, setemployeeFristName] = useState('')
+    const [employeeLastName, setemployeeLastName] = useState('')
     const [dateOfBirth, setdateOfBirth] = useState('')
     const [gender, setgender] = useState('')
     const [mobileNumber, setmobileNumber] = useState('')
@@ -46,10 +47,10 @@ function DashBoard(){
       };
     const showEdit=(e)=>{
         console.log('whole', e)
-        axios.put(`https://hrglory.herokuapp.com/api/hr/employee/${e}/details`)
+         axios.put(`https://hrglory.herokuapp.com/api/hr/employee/${e}/details`)
         .then(response=>{
             console.log('Response', response.data.data.employeeFirstName)
-            console.log('last name',response.data.data.employeeLastName)
+            console.log('company name',response.data.data.employeePerviousCompanyName)
             setEmployeeId(response.data.data.employeeId)
             setemployeeFristName(response.data.data.employeeFirstName)
             setemployeeLastName(response.data.data.employeeLastName)
@@ -58,7 +59,7 @@ function DashBoard(){
             setmobileNumber(response.data.data.employeeContact)
             setemailID(response.data.data.employeeEmail)
             setemployeeAddress(response.data.data.employeeAddress)
-            setalternateMobileNumber(response.data.data.employeeAlternateContac)
+            setalternateMobileNumber(response.data.data.employeeAlternateContact)
             setcompanyName(response.data.data.employeePerviousCompanyName)
             setcompanyAddress(response.data.data.employeePerviousCompanyAddress)
             setdateOfJoining(response.data.data.employeePerviousCompanyJoinDate)
@@ -69,10 +70,10 @@ function DashBoard(){
         setModalEdit(true)
     }
 
-    const handleOk = () => {
-        setIsModalVisible(false);
+    const handleOk = async() => {
+        
         setModalEdit(false)
-        axios.post('https://hrglory.herokuapp.com/api/hr/employee/edit',{
+       await axios.post('https://hrglory.herokuapp.com/api/hr/employee/edit',{
             employeeId:employeeId,
             employeeFirstName: employeeFristName,
             employeeLastName: employeeLastName,
@@ -91,6 +92,22 @@ function DashBoard(){
             .then(response=>{
                 console.log('edited',response)
                 message.success('updated!')
+                setAllDelete('Data update')
+                setemployeeFristName('first name')
+                setemployeeLastName('last name')
+                setdateOfBirth('dob')
+                setgender('set gender')
+                setmobileNumber('mobile no')
+                setemailID('email id')
+                setemployeeAddress('employee address')
+                setalternateMobileNumber('alternate no')
+                setcompanyName('company name')
+                setcompanyAddress('company address')
+                setdateOfJoining('joining date')
+                setdateOfLeaveing('leaving date')
+                setidentityProof('identity proof')
+
+
 
             })
             .catch(error=>{
@@ -98,7 +115,9 @@ function DashBoard(){
             })
       };
     
-
+    const handleSeemoreOK=()=>{
+        setIsModalVisible(false);
+    }
     const handleCancel = () => {
         setIsModalVisible(false);
         setModalEdit(false)
@@ -166,13 +185,15 @@ function DashBoard(){
     }
   
     
-    console.log('employee firstname',employeeFristName)
-    console.log('employee lastname',employeeLastName)
-    console.log('dob',dateOfBirth)
-    console.log('gender',gender)
-    console.log('mobile',mobileNumber)
-    console.log('emailID',emailID)
-    console.log('employee address',employeeAddress)
+    // console.log('employee firstname',employeeFristName)
+    // console.log('employee lastname',employeeLastName)
+    // console.log('dob',dateOfBirth)
+    // console.log('gender',gender)
+    // console.log('mobile',mobileNumber)
+    // console.log('emailID',emailID)
+    // console.log('employee address',employeeAddress)
+    // console.log('Date of joining',dateOfJoining)
+    // console.log('Date of leaving',dateOfLeaveing);
     
 
     
@@ -246,7 +267,7 @@ function DashBoard(){
                                      
                                     
                                 </Table>
-                                <Modal title='More Information' visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} width={2000}>
+                                <Modal title='More Information' visible={isModalVisible} onOk={handleSeemoreOK} onCancel={handleCancel} width={2000}>
                                                     <p>
                                                     
                                                         
@@ -268,22 +289,22 @@ function DashBoard(){
 
                                    <Modal title='To Edit' visible={isModalEdit} onOk={handleOk} onCancel={handleCancel} width={2000}>
                                   
-                                        <Form.Item>
-                                            <Input placeholder='First name' defaultValue={employeeFristName} onChange={(e)=>setemployeeFristName(e.target.value)}></Input>
+                                        <Form.Item >
+                                            <Input placeholder='First name' value={employeeFristName} defaultValue={employeeFristName} onChange={(e)=>setemployeeFristName(e.target.value)}></Input>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Input placeholder='Last name' defaultValue={employeeLastName} onChange={(e)=>setemployeeLastName(e.target.value)}></Input>
+                                            <Input placeholder='Last name' value={employeeLastName} defaultValue={employeeLastName} onChange={(e)=>setemployeeLastName(e.target.value)}></Input>
                                         </Form.Item>
                                         <Form.Item>
-                                            <DatePicker placeholder='dob' ></DatePicker>
+                                            <DatePicker placeholder='dob' value={moment(dateOfBirth)} onChange={(dateString)=>setdateOfBirth(dateString)}></DatePicker>
                                         </Form.Item>
                                         <Form.Item>
 
                                         <Select
                                             placeholder="Select a option and change input text above"
-                                            // onChange={(e) => { genderHandleChange(e) }}
+                                            onChange={(e) => { setgender(e) }}
                                             defaultValue={gender}
-                                            
+                                            value={gender}
                                         >
                                             <Option value="male">male</Option>
                                             <Option value="female">female</Option>
@@ -291,29 +312,29 @@ function DashBoard(){
                                         </Select>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Input placeholder='Phone number' defaultValue={mobileNumber} onChange={(e)=>setmobileNumber(e.target.value)}></Input>
+                                            <Input placeholder='Phone number' value={mobileNumber} defaultValue={mobileNumber} onChange={(e)=>setmobileNumber(e.target.value)}></Input>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Input placeholder='Email'  defaultValue={emailID} onChange={(e)=>setemailID(e.target.value)}></Input>
+                                            <Input placeholder='Email' value={emailID} defaultValue={emailID} onChange={(e)=>setemailID(e.target.value)}></Input>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Input placeholder='Employee address' defaultValue={employeeAddress} onChange={(e)=>setemployeeAddress(e.target.value)}></Input>
+                                            <Input placeholder='Employee address' value={employeeAddress} defaultValue={employeeAddress} onChange={(e)=>setemployeeAddress(e.target.value)}></Input>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Input placeholder='alternate number' defaultValue={alternateMobileNumber} onChange={(e)=>setalternateMobileNumber(e.target.value)}></Input>
+                                            <Input placeholder='alternate number' value={alternateMobileNumber} defaultValue={alternateMobileNumber} onChange={(e)=>setalternateMobileNumber(e.target.value)}></Input>
                                         </Form.Item>
                                         <Form.Item>
-                                            <Input placeholder='company name'  defaultValue={companyName} onChange={(e)=>setcompanyName(e.target.value)}></Input>
+                                            <Input placeholder='company name' value={companyName} defaultValue={companyName} onChange={(e)=>setcompanyName(e.target.value)}></Input>
                                         </Form.Item>
                                         
                                         <Form.Item>
-                                            <TextArea rows={2} placeholder='company address' defaultValue={companyAddress} onChange={(e)=>setcompanyAddress(e.target.value)} ></TextArea>
+                                            <TextArea rows={2} placeholder='company address' value={companyAddress} defaultValue={companyAddress} onChange={(e)=>setcompanyAddress(e.target.value)} ></TextArea>
                                         </Form.Item>
                                         <Form.Item>
-                                            <DatePicker placeholder='Joining date' defaultValue={dateOfJoining} ></DatePicker>
+                                            <DatePicker placeholder='Joining date' value={moment(dateOfJoining)} defaultValue={dateOfJoining} onChange={(dateString)=>setdateOfJoining(dateString)}></DatePicker>
                                         </Form.Item>
                                         <Form.Item>
-                                            <DatePicker placeholder='Leavinig date' defaultValue={dateOfLeaveing} ></DatePicker>
+                                            <DatePicker placeholder='Leavinig date' value={moment(dateOfLeaveing)} defaultValue={dateOfLeaveing} onChange={(dateString)=>setdateOfLeaveing(dateString)}></DatePicker>
                                         </Form.Item>
                                         <Form.Item>
                                             <Upload  customRequest={dummyRequest}

@@ -3,7 +3,6 @@ import background from '../Images/bg.png'
 import 'antd/dist/antd.css';
 import { Form, Input, Button, Checkbox, Card, Select, DatePicker, Upload, message, Steps, PageHeader, Image, Menu, Divider } from 'antd'
 import Title from 'antd/lib/typography/Title';
-
 import moment from 'moment';
 import Layout, { Content, Header } from 'antd/lib/layout/layout';
 import Sider from 'antd/lib/layout/Sider';
