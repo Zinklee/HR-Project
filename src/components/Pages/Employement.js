@@ -6,6 +6,7 @@ import Title from 'antd/lib/typography/Title';
 import moment from 'moment';
 import Layout, { Content, Header } from 'antd/lib/layout/layout';
 import Sider from 'antd/lib/layout/Sider';
+import {useHistory} from 'react-router-dom'
 
 const { Step } = Steps;
 const { Option } = Select;
@@ -35,7 +36,7 @@ const steps = [
 
 
 function Employement() {
-
+    let history= useHistory();
     const [isFresher, setIsFresher] = useState(false)
     const [isBasicDetalis, setisBasicDetalis] = useState(true)
     const [isContactDetalis, setisContactDetalis] = useState(false)
@@ -160,6 +161,12 @@ function Employement() {
 
 
     }
+    const handleLogin = () => {
+
+        history.push('/LoginPage')
+        
+    }
+    
 
 
     return (
@@ -255,6 +262,8 @@ function Employement() {
                                            
                                         </div>
                                     </Form.Item>
+                                    <p>Already Registered?<Button type='link' onClick={handleLogin}>Login</Button></p>
+                                   
                                 </Form>
                                 
 
