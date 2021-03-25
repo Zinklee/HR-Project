@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import 'antd/dist/antd.css';
-import { Layout, Menu, Breadcrumb, Button , Collapse, Modal, InputNumber,Input, DatePicker,Select, Upload, message
+import { Layout, Menu, Breadcrumb, Button , Collapse, Modal,Input, DatePicker,Select, Upload, message
 } from 'antd';
 import moment from 'moment';
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
@@ -8,21 +8,25 @@ import { Table,Tag,Space } from "antd";
 import axios from 'axios';
 import { Form } from "antd";
 import TextArea from 'antd/lib/input/TextArea';
+import { useHistory } from 'react-router';
+import EmployeeStatus from './EmployeeStatus'
+import { Link,Route } from 'react-router-dom';
+import RequestLeave from './RequestLeave';
 const { Column, ColumnGroup } = Table;
 const { Header, Content, Sider } = Layout;
 const { Option } = Select;
 
 
 function DashBoard(){
+    let history=useHistory()
     const[allData,setAllData] = useState([])
     const[allDelete,setAllDelete]=useState([])
     const[isSeeMore,setSeeMore]=useState(false)
     const[singleDetail,setSingleDetail]=useState({})
     const[isModalVisible, setIsModalVisible] = useState(false);
     const[isModalEdit,setModalEdit]=useState(false);
-    const[form]=Form.useForm();
-    const[editkey,setEditKey]=useState('')
-    const isEditing = (record)=> record.key===editkey
+    const[isModalConfirm,setModalConfirm]=useState(false)
+    const[visible,setVisible]=useState(false)
 
     const[employeeId,setEmployeeId]=useState('')
     const [employeeFristName, setemployeeFristName] = useState('')
@@ -38,7 +42,10 @@ function DashBoard(){
     const [dateOfJoining, setdateOfJoining] = useState('')  
     const [dateOfLeaveing, setdateOfLeaveing] = useState('')
     const [identityProof, setidentityProof] = useState('')
-
+    
+    const [isEmployee, setIsEmployee] = useState(true)
+    const [isEmployeeStatus, setIsEmployeeStatus] = useState(false)
+    const [isRequestLeave, setisRequestLeave] = useState(false)
     
 
     const showModal = (e) => {
@@ -93,7 +100,7 @@ function DashBoard(){
                 console.log('edited',response)
                 message.success('updated!')
                 setAllDelete('Data update')
-                setemployeeFristName('first name')
+                 setemployeeFristName('first name')
                 setemployeeLastName('last name')
                 setdateOfBirth('dob')
                 setgender('set gender')
@@ -121,15 +128,29 @@ function DashBoard(){
     const handleCancel = () => {
         setIsModalVisible(false);
         setModalEdit(false)
+        
       };
+    const handleConfirmCancel=()=>{
+        setModalConfirm(false)
+    }
+    const handleSend=()=>{
+        Modal.success({
+            content:'Send'
+        })
+        setModalConfirm(false)
+    }
 
       const dummyRequest = ({ file, onSuccess }) => {
         setTimeout(() => {
             onSuccess("ok");
         }, 0);
     };
-       
-    
+     
+    // useEffect(()=>{
+    //     return()=>{
+    //         history.go(1)
+    //     }
+    // },[])
     
     useEffect((e)=>{
         async function fetchAPI(){
@@ -137,10 +158,13 @@ function DashBoard(){
             .then(response=>{
                 console.log('response', response.data.data)
                 setAllData(response.data.data)
+                
             })
         }
         fetchAPI()
-       
+        return()=>{
+            history.goForward()
+        }
         
       
     },[allDelete]);
@@ -167,23 +191,28 @@ function DashBoard(){
             
     }
 
-    const handleEdit=(e)=>{
-        
-        form.setFieldsValue({
-            employeeFirstName:'',
-            employeeLastName:'',
-            employeeDob:'',
-            employeeGender:'',
-            employeeContact:'',
-            employeeEmail:'',
-            employeeAddress:"", 
-            ...e,
-
-        })
-        setEditKey(e.key)
-        
+    
+    const handleLogout=()=>{
+        history.push('/LoginPage')
     }
-  
+    const handleEmployeeStatus = ()=>{
+        setIsEmployee(false)
+        setIsEmployeeStatus(true)
+        setisRequestLeave(false)
+      // history.push('/EmployeeStatus')
+    };
+    const handleEmployee = ()=>{
+        setIsEmployee(true)
+        setIsEmployeeStatus(false)
+        setisRequestLeave(false)
+      // history.push('/EmployeeStatus')
+    };
+    const handleRequestLeave = ()=>{
+        setIsEmployee(false)
+        setIsEmployeeStatus(false)
+        setisRequestLeave(true)
+        //history.push('/RequestLeave')
+    };
     
     // console.log('employee firstname',employeeFristName)
     // console.log('employee lastname',employeeLastName)
@@ -216,15 +245,26 @@ function DashBoard(){
                                 defaultOpenKeys={['sub1']}
                                 style={{ height: '100%', borderRight: 0 }}
                                 >
-                                <Menu.Item key="sub1" icon={<UserOutlined />} title="Employee 1" >
-                                    Employee 1
+                                <Menu.Item key="1" icon={<UserOutlined />} title="Employee 1" onClick={handleEmployee} >
+                                    Employee 
                                 </Menu.Item>
-                                <Menu.Item key="sub2" icon={<LaptopOutlined />} title="Employee 2">
-                                    Employee 2
+                               <Menu.Item key='2'  icon={<UserOutlined/>} onClick={handleEmployeeStatus}>
+                                    Employee Status    
+                                
+                               </Menu.Item>
+                               <Menu.Item icon={<UserOutlined/>} onClick={handleRequestLeave}>
+                                    Request Leave
+                                   {/* <Button>Request Leave</Button> */}
+                               </Menu.Item>
+                                <Menu.Item>
+                                    <Button onClick={handleLogout}>Logout</Button>
                                 </Menu.Item>
+
+
                                 
                                 </Menu>
                             </Sider>
+                            {isEmployee?
                             <Layout style={{ padding: '24px 24px 24px' }}>
                                 <Breadcrumb style={{ margin: '16px 0' }}>
                                 <Breadcrumb.Item>Home</Breadcrumb.Item>
@@ -251,10 +291,11 @@ function DashBoard(){
                                     <Column title='EmployeeAddress' dataIndex='employeeAddress' key='employeeAddress'></Column>
                                     <Column title='Action'  dataIndex='employeeId' render={(e,record) => (
                                             <Space>
-                                                <Button  onClick={()=>{handleEdit(record); showEdit(e)}}>Edit</Button>
+                                                <Button  onClick={()=>{ showEdit(e)}}>Edit</Button>
                                                 <Button onClick={()=>{handleSeeMore(e); console.log('E',e);setSeeMore(true);console.log('see more',isSeeMore);showModal(e);console.log('single', singleDetail)}}>See more </Button>
                                                         
                                                 <a><Button  onClick={()=>{handleDelete(e); console.log('All date',e)}}>Delete</Button></a>
+                                                <Button onClick={()=>setModalConfirm(true)}>Confirm</Button>
                                             </Space>
   
                                            
@@ -341,19 +382,38 @@ function DashBoard(){
                                                      onChange={(e) => {console.log("info", e.file);}}><Button>Select</Button></Upload>
                                         </Form.Item>
 
-
-
-                                        
-                                     
-                                        
-                                        
-                                        
-
                                    </Modal>
-                                        
+                            
+                                   <Modal title='Email and Password' visible={isModalConfirm} onCancel={handleConfirmCancel} okText='Send' onOk={handleSend}>
+                                       <Form.Item
+                                        label='Email'
+                                        name='Email'
+                                        rules={[
+                                            {
+                                                required:true,
+                                                message:'Please enter email'
+                                            }
+                                        ]}
+                                       >
+                                           <Input></Input>
+                                       </Form.Item>
+                                       <Form.Item
+                                       label='Password'
+                                       name='password'
+                                       rules={[
+                                           {
+                                               required:true,
+                                               message:'Please enter password'
+                                           }
+                                       ]}
+                                       >
+                                        <Input.Password></Input.Password>
+                                       </Form.Item>
+                                   </Modal>
+                                    <Route exact path='/EmployeeStatus' component={EmployeeStatus}></Route>
                                
                                 </Content>
-                            </Layout>
+                            </Layout>:isEmployeeStatus?<EmployeeStatus/>:isRequestLeave?<RequestLeave />:''}
                 </Layout>
             </Layout>
         </>
